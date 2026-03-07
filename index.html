@@ -6,7 +6,6 @@
   <title>SOSANA – Project Documentation</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
-    /* ── Base Reset & Typography ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --blue:    #1e3a5f;
@@ -19,7 +18,9 @@
       --green:   #16a34a;
       --red:     #dc2626;
       --gold:    #ca8a04;
+      --toc-width: 280px;
     }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       color: var(--text);
@@ -36,19 +37,8 @@
       color: var(--white);
       text-align: center;
       padding: 80px 40px;
-      page-break-after: always;
     }
-    .cover .logo-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.12);
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      width: 110px; height: 110px;
-      line-height: 110px;
-      font-size: 52px;
-      margin-bottom: 30px;
-    }
-    .cover h1 { font-size: 42px; font-weight: 800; letter-spacing: 1px; }
+    .cover img { max-width: 220px; height: auto; }
     .cover .subtitle {
       font-size: 20px; margin-top: 12px; opacity: .85; font-weight: 300;
     }
@@ -62,6 +52,8 @@
       border-radius: 14px;
       padding: 28px 40px;
       border: 1px solid rgba(255,255,255,0.2);
+      max-width: 700px;
+      width: 100%;
     }
     .cover .meta-box .item label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; opacity:.65; }
     .cover .meta-box .item p { font-size: 15px; font-weight: 600; margin-top: 3px; }
@@ -76,13 +68,39 @@
       letter-spacing: .5px;
     }
 
-    /* ── Sidebar Layout ── */
+    /* ── Mobile TOC Hamburger ── */
+    #toc-toggle {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 1000;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 13px;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #toc-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 900;
+    }
+    #toc-overlay.open { display: block; }
+
+    /* ── Main Layout ── */
     .layout { display: flex; min-height: 100vh; }
 
     /* ── Sidebar TOC ── */
     #toc {
-      width: 280px;
-      min-width: 280px;
+      width: var(--toc-width);
+      min-width: var(--toc-width);
       background: var(--blue);
       color: var(--white);
       position: sticky;
@@ -91,6 +109,8 @@
       overflow-y: auto;
       padding: 0;
       flex-shrink: 0;
+      transition: transform 0.3s ease;
+      z-index: 950;
     }
     #toc .toc-header {
       background: #0f2444;
@@ -132,7 +152,7 @@
     }
 
     /* ── Main Content ── */
-    #content { flex: 1; padding: 0; overflow-x: hidden; }
+    #content { flex: 1; padding: 0; overflow-x: hidden; min-width: 0; }
 
     /* ── Section Wrappers ── */
     .section {
@@ -187,10 +207,7 @@
       padding: 22px;
       box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
-    .card .card-icon {
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
+    .card .card-icon { font-size: 28px; margin-bottom: 12px; }
     .card h4 { margin: 0 0 8px; color: var(--blue); font-size: 15px; }
     .card p { font-size: 13.5px; color: var(--muted); margin: 0; }
     .card.accent { border-top: 3px solid var(--accent); }
@@ -199,14 +216,10 @@
     .card.gold   { border-top: 3px solid var(--gold); }
 
     /* ── Tables ── */
-    .table-wrap { overflow-x: auto; margin: 20px 0; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+    .table-wrap { overflow-x: auto; margin: 20px 0; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
     thead { background: var(--blue); color: #fff; }
-    thead th { padding: 13px 16px; text-align: left; font-weight: 600; }
+    thead th { padding: 13px 16px; text-align: left; font-weight: 600; white-space: nowrap; }
     tbody tr:nth-child(even) { background: var(--light); }
     tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
     tbody tr:hover { background: #e8efff; }
@@ -215,7 +228,7 @@
     ul.styled, ol.styled { margin: 12px 0 18px 24px; }
     ul.styled li, ol.styled li { margin-bottom: 7px; }
 
-    /* ── Info / Callout Box ── */
+    /* ── Callout Box ── */
     .callout {
       border-left: 4px solid var(--accent);
       background: var(--light);
@@ -231,12 +244,9 @@
     .badge-wrap { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
     .badge {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--blue);
-      color: #fff;
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 13px;
-      font-weight: 500;
+      background: var(--blue); color: #fff;
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 13px; font-weight: 500;
     }
     .badge.green  { background: #15803d; }
     .badge.red    { background: #b91c1c; }
@@ -252,72 +262,130 @@
       padding: 28px;
       margin: 24px 0;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 2px 10px rgba(0,0,0,.06);
     }
     .diagram-label {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 14px;
-      font-style: italic;
+      font-size: 12px; color: var(--muted);
+      text-align: center; margin-top: 14px; font-style: italic;
     }
 
     /* ── Status Tag ── */
     .tag {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
+      display: inline-block; padding: 3px 10px;
+      border-radius: 12px; font-size: 12px; font-weight: 600;
     }
     .tag.blue   { background: #dbeafe; color: #1d4ed8; }
     .tag.green  { background: #dcfce7; color: #15803d; }
     .tag.orange { background: #fed7aa; color: #9a3412; }
     .tag.red    { background: #fee2e2; color: #b91c1c; }
 
-    /* ── PERT Timeline ── */
-    .pert-row {
-      display: grid;
-      grid-template-columns: 160px 1fr 90px 90px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-    }
-    .pert-row.header {
-      font-weight: 700;
-      color: var(--blue);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      padding-bottom: 8px;
-    }
-    .pert-bar { height: 18px; background: var(--accent); border-radius: 4px; opacity: .85; }
-
     /* ── Footer ── */
     .doc-footer {
-      background: var(--blue);
-      color: rgba(255,255,255,.7);
-      text-align: center;
-      padding: 30px;
-      font-size: 13px;
+      background: var(--blue); color: rgba(255,255,255,.7);
+      text-align: center; padding: 30px; font-size: 13px;
     }
 
-    /* ── Print / Page Break ── */
+    /* ════════════════════════════════════
+       RESPONSIVE BREAKPOINTS
+    ════════════════════════════════════ */
+
+    /* ── Tablet: 768px–1024px ── */
+    @media (max-width: 1024px) {
+      .section { padding: 40px 36px; }
+      h2.section-title { font-size: 24px; }
+      h3 { font-size: 18px; }
+      .cover .meta-box { grid-template-columns: 1fr; gap: 12px; padding: 22px 28px; }
+    }
+
+    /* ── Mobile: below 768px ── */
+    @media (max-width: 768px) {
+      #toc-toggle { display: block; }
+
+      #toc {
+        position: fixed;
+        top: 0; left: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+      }
+      #toc.open { transform: translateX(0); }
+
+      .layout { display: block; }
+      #content { width: 100%; }
+
+      .cover {
+        padding: 60px 20px 40px;
+      }
+      .cover img { max-width: 160px; }
+      .cover .subtitle { font-size: 16px; }
+      .cover .meta-box {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 18px 20px;
+        margin-top: 30px;
+        text-align: left;
+      }
+      .cover .version-tag { font-size: 11px; padding: 5px 16px; margin-top: 24px; }
+
+      .section { padding: 30px 18px; }
+      h2.section-title { font-size: 20px; padding-left: 12px; margin-bottom: 20px; }
+      h3 { font-size: 17px; }
+      h4 { font-size: 15px; }
+
+      .card-grid { grid-template-columns: 1fr; gap: 14px; }
+
+      .diagram-box { padding: 16px 12px; }
+
+      .badge { font-size: 12px; padding: 4px 11px; }
+
+      .doc-footer { padding: 20px 16px; font-size: 12px; }
+      .doc-footer p { margin-bottom: 6px; }
+
+      /* Make table cells stack nicely on mobile */
+      .table-wrap table { font-size: 13px; }
+      .table-wrap thead th,
+      .table-wrap tbody td { padding: 9px 12px; }
+
+      /* Scroll hint for tables */
+      .table-wrap::after {
+        content: '← scroll →';
+        display: block;
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        padding: 4px 0 2px;
+        opacity: 0.7;
+      }
+    }
+
+    /* ── Small Mobile: below 480px ── */
+    @media (max-width: 480px) {
+      .section { padding: 24px 14px; }
+      h2.section-title { font-size: 18px; }
+      .cover .subtitle { font-size: 14px; }
+      .cover .meta-box .item p { font-size: 13px; }
+    }
+
+    /* ── Print ── */
     @media print {
-      #toc { display: none; }
+      #toc, #toc-toggle, #toc-overlay { display: none; }
       .section { padding: 40px 50px; }
+      .layout { display: block; }
     }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
+<!-- ── Mobile TOC Toggle ── -->
+<button id="toc-toggle" aria-label="Open navigation" onclick="toggleTOC()">☰</button>
+<div id="toc-overlay" onclick="closeTOC()"></div>
+
+<!-- ════════════════════
      COVER PAGE
-════════════════════════════════════════════ -->
+════════════════════ -->
 <div class="cover">
-  <h1><img src="https://sosana.io/wp-content/uploads/2025/03/GIF2-Transparent-1.gif" alt="Description"></h1>
-  <!-- <h1>TrustBOB</h1> -->
+  <h1><img src="https://sosana.io/wp-content/uploads/2025/03/GIF2-Transparent-1.gif" alt="SOSANA Logo"></h1>
   <div class="subtitle">SOSANA Business Complaint, Review &amp; Rating Platform</div>
   <div class="subtitle" style="font-size:14px; margin-top:8px; opacity:.65;">Comprehensive Project Documentation</div>
   <div class="meta-box">
@@ -329,13 +397,13 @@
     <div class="item"><label>Project Type</label><p>Web Application</p></div>
     <div class="item"><label>Website</label><p>yogreet.com</p></div>
     <div class="item"><label>Contact</label><p>support@yogreet.com</p></div>
-    <div class="version-tag">📄 Confidential — Yogreet Global LLP Internal Use Only</div>
   </div>
+  <div class="version-tag">📄 Confidential — Yogreet Global LLP Internal Use Only</div>
 </div>
 
-<!-- ════════════════════════════════════════════
+<!-- ════════════════════
      MAIN LAYOUT
-════════════════════════════════════════════ -->
+════════════════════ -->
 <div class="layout">
 
   <!-- ── Sidebar TOC ── -->
@@ -344,8 +412,6 @@
     <ul>
       <li class="section-title"><a href="#s1">1. Company Profile</a></li>
       <li class="sub"><a href="#s1-overview">1.1 Organisation Overview</a></li>
-      <li class="sub"><a href="#s1">1.2 Services Portfolio</a></li>
-      <li class="sub"><a href="#s1">1.3 Market Presence</a></li>
       <li class="sub"><a href="#s1-cert">1.4 Registration &amp; Docs</a></li>
 
       <li class="section-title"><a href="#s2">2. Project Profile</a></li>
@@ -385,19 +451,17 @@
   <!-- ── Main Content ── -->
   <main id="content">
 
-    <!-- ══════════════════════════════════
+    <!-- ═══════════════════════════
          SECTION 1 — COMPANY PROFILE
-    ══════════════════════════════════ -->
+    ═══════════════════════════ -->
     <div class="section" id="s1">
       <div class="section-number">Section 01</div>
       <h2 class="section-title">Company Profile</h2>
 
-      <!-- <h3 id="s1-overview">1.1 Organisation Overview</h3> -->
-
       <div class="table-wrap" style="margin-bottom:28px">
         <table>
           <tbody>
-            <tr><td style="width:200px"><strong>Company Name</strong></td><td><strong>Yogreet Global LLP</strong></td></tr>
+            <tr><td style="min-width:160px"><strong>Company Name</strong></td><td><strong>Yogreet Global LLP</strong></td></tr>
             <tr><td><strong>Legal Structure</strong></td><td>Limited Liability Partnership (LLP)</td></tr>
             <tr><td><strong>Industry</strong></td><td>Artificial Intelligence · PropTech · SaaS</td></tr>
             <tr><td><strong>Founded</strong></td><td>2023</td></tr>
@@ -418,120 +482,9 @@
         </table>
       </div>
 
-      <!-- <p>
-        <strong>Yogreet Global LLP</strong> is an AI-first technology company headquartered in Surat, India,
-        specialising in intelligent automation solutions for the real estate industry. The company was born
-        out of an 18-hour brainstorming marathon between founder <strong>Kapil Maheshwari</strong> — a sales
-        &amp; technology visionary — and co-ideator <strong>Yash Agarwal</strong>, with one transformative
-        insight: integrate conversational AI directly into the sales channels that real estate professionals
-        already use every day.
-      </p>
-      <p>
-        The result is <strong>PropertyChat.AI</strong> — Yogreet Global's flagship AI chatbot product — which
-        seamlessly connects real estate businesses with their leads through WhatsApp Business API, Facebook
-        Messenger, SMS/iMessage, and AI-powered Voice Calls. By training the AI model on each client's
-        CRM data, property listings, and brand voice, Yogreet Global enables autonomous lead engagement
-        that schedules site visits, answers property queries, and nurtures leads around the clock.
-      </p>
-      <p>
-        TrustBOB is Yogreet Global's second major product — a <strong>Business Review, Rating &amp;
-        Complaint Management Platform</strong> developed in collaboration with the SOSANA blockchain
-        ecosystem. It reflects the company's expanding vision beyond PropTech into trust, transparency,
-        and consumer accountability in the Web3 space.
-      </p>
-
-      <div class="card-grid">
-        <div class="card accent">
-          <div class="card-icon">🎯</div>
-          <h4>Vision</h4>
-          <p>"Simplifying Success" — a world where securing a sale is as easy as having a conversation, powered by AI sophistication.</p>
-        </div>
-        <div class="card green">
-          <div class="card-icon">🚀</div>
-          <h4>Mission</h4>
-          <p>To make lives easier by enabling more sales and revenue through intelligent, responsive, and intuitive AI interactions across every communication channel.</p>
-        </div>
-        <div class="card gold">
-          <div class="card-icon">🏠</div>
-          <h4>Core Product — PropertyChat.AI</h4>
-          <p>AI chatbot integrated with WhatsApp, Facebook Messenger, SMS, and Voice Calls — trained on CRM data and property listings for autonomous lead nurturing.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">🔍</div>
-          <h4>TrustBOB Project</h4>
-          <p>A Web3-integrated business review &amp; complaint platform developed by Yogreet Global for the SOSANA ecosystem, combining AI moderation with on-chain identity verification.</p>
-        </div>
-      </div>
-
-      <h3>1.2 Services Portfolio</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Service</th><th>Description</th><th>Pricing</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>🥇 <strong>WhatsApp Integration (Hardcore Package)</strong></td>
-              <td>Single WhatsApp Business number, AI-generated messaging templates, CRM &amp; property listing connectivity, unlimited lead conversations</td>
-              <td>$500/year or $50/month</td>
-            </tr>
-            <tr>
-              <td>🥈 <strong>Facebook Chatbot (Social Package)</strong></td>
-              <td>Facebook Business page integration, CRM connectivity, paid ad chatbot enhancement, unlimited lead interactions</td>
-              <td>$500/year or $50/month</td>
-            </tr>
-            <tr>
-              <td>🥉 <strong>SMS Outreach (Traditional Package)</strong></td>
-              <td>SMS &amp; iMessage AI integration, CRM connectivity, property listing interface, unlimited lead interactions</td>
-              <td>$500/year or $50/month</td>
-            </tr>
-            <tr>
-              <td>🔊 <strong>AI Voice Calls</strong></td>
-              <td>Humanoid AI voice system that makes outbound calls using client data, guides leads through queries, and schedules site visits</td>
-              <td>Custom Pricing</td>
-            </tr>
-            <tr>
-              <td>🔍 <strong>TrustBOB Platform (Web3)</strong></td>
-              <td>Business review, rating &amp; complaint management platform integrated with SOSANA blockchain ecosystem</td>
-              <td>Project-based</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>1.3 Market Presence &amp; Clients</h3>
-      <p>
-        Yogreet Global serves real estate agencies across multiple continents. Verified client testimonials
-        reflect deployments in <strong>France</strong> (Agency Leroy), <strong>Singapore</strong>
-        (Property Guru), <strong>Spain</strong> (RE/MAX Pioneers), and research-driven market engagements
-        in <strong>Dubai</strong> (UAE) — demonstrating the platform's global scalability and cross-market
-        applicability.
-      </p>
-      <div class="card-grid">
-        <div class="card accent" style="text-align:center">
-          <div class="card-icon">🇫🇷</div>
-          <h4>France</h4>
-          <p>Agency Leroy — CRM + AI chatbot integration with personalised AI model training.</p>
-        </div>
-        <div class="card accent" style="text-align:center">
-          <div class="card-icon">🇸🇬</div>
-          <h4>Singapore</h4>
-          <p>Property Guru — WhatsApp &amp; SMS AI integration for instant property inquiry handling.</p>
-        </div>
-        <div class="card accent" style="text-align:center">
-          <div class="card-icon">🇪🇸</div>
-          <h4>Spain</h4>
-          <p>RE/MAX Pioneers — WhatsApp AI deployment for autonomous lead nurturing and deal facilitation.</p>
-        </div>
-        <div class="card accent" style="text-align:center">
-          <div class="card-icon">🇦🇪</div>
-          <h4>UAE / Dubai</h4>
-          <p>Market research &amp; realtor consultations conducted to validate platform requirements and design multi-channel AI communication approach.</p>
-        </div>
-      </div>
-
-      <h3 id="s1-cert">1.4 Registration &amp; Organisational Documents</h3>
+      <h3 id="s1-cert">Registration &amp; Organisational Documents</h3>
       <div class="callout">
-        <strong>Note:</strong> The following organisational documents are maintained by Yogreet Global LLP
-        and are available upon request for authorised personnel and project evaluators.
+        <strong>Note:</strong> The following organisational documents are maintained by Yogreet Global LLP and are available upon request for authorised personnel and project evaluators.
       </div>
       <div class="table-wrap">
         <table>
@@ -542,56 +495,40 @@
             <tr><td>LLP Registration Certificate</td><td><span class="tag green">Available</span></td><td>MCA-registered LLP incorporation certificate under the Ministry of Corporate Affairs, India</td></tr>
             <tr><td>GST Registration Certificate</td><td><span class="tag green">Available</span></td><td>GST registration for Yogreet Global LLP under the Government of India tax framework</td></tr>
             <tr><td>Software Product License — TrustBOB</td><td><span class="tag green">Available</span></td><td>CodeCanyon extended commercial license for TrustBOB v1.4 by Vironeer</td></tr>
-            <tr><td>Privacy Policy &amp; Terms of Service</td><td><span class="tag green">Published</span></td><td>Available at <a href="https://yogreet.com/privacy-policy" target="_blank">yogreet.com/privacy-policy</a> and <a href="https://yogreet.com/terms-conditions" target="_blank">yogreet.com/terms-conditions</a></td></tr>
-            <tr><td>Refund Policy</td><td><span class="tag green">Published</span></td><td>Available at <a href="https://yogreet.com/refund-policy" target="_blank">yogreet.com/refund-policy</a></td></tr>
+            <tr><td>Privacy Policy &amp; Terms of Service</td><td><span class="tag green">Published</span></td><td>Available at <a href="https://yogreet.com/privacy-policy" target="_blank">yogreet.com/privacy-policy</a></td></tr>
             <tr><td>SOSANA dApp Integration Agreement</td><td><span class="tag blue">Internal</span></td><td>Partnership &amp; API integration agreement with SOSANA for KYC and token eligibility verification</td></tr>
             <tr><td>Meta Business Verification</td><td><span class="tag green">Available</span></td><td>WhatsApp &amp; Facebook Business API verification via Meta for the PropertyChat.AI service</td></tr>
             <tr><td>Data Processing Agreement</td><td><span class="tag orange">In Progress</span></td><td>GDPR-aligned data processing agreement for EU client deployments</td></tr>
           </tbody>
         </table>
       </div>
-    </div> -->
+    </div>
 
-    <!-- ══════════════════════════════════
+    <!-- ═══════════════════════════
          SECTION 2 — PROJECT PROFILE
-    ══════════════════════════════════ -->
+    ═══════════════════════════ -->
     <div class="section" id="s2">
       <div class="section-number">Section 02</div>
       <h2 class="section-title">Project Profile</h2>
 
       <h3 id="s2-def">2.1 Project Definition</h3>
       <p>
-        <strong>SOSANA Business Complaint, Review & Rating Platform</strong> is a multi-role, multi-tenant web application that functions as a
-        Business Review, Rating, and Complaint Management Platform. integrate with the SOSANA blockchain ecosystem,
-        enabling identity-verified consumer feedback on registered businesses.
+        <strong>SOSANA Business Complaint, Review &amp; Rating Platform</strong> is a multi-role, multi-tenant web application that functions as a Business Review, Rating, and Complaint Management Platform, integrated with the SOSANA blockchain ecosystem, enabling identity-verified consumer feedback on registered businesses.
       </p>
       <div class="callout success">
-        <strong>Unique Selling Point:</strong> Unlike conventional review platforms, SOSANA Platform 
-        requires users to hold SOSANA tokens and complete on-chain KYC to file complaints — 
-        significantly reducing fake and spam submissions.
+        <strong>Unique Selling Point:</strong> Unlike conventional review platforms, SOSANA Platform requires users to hold SOSANA tokens and complete on-chain KYC to file complaints — significantly reducing fake and spam submissions.
       </div>
 
       <h3 id="s2-desc">2.2 Project Description</h3>
-      <p>
-        The platform is a PHP/Laravel-based web application hosted on a standard LAMP/LEMP server or
-        cloud infrastructure. It provides three distinct portals:
-      </p>
+      <p>The platform is a PHP/Laravel-based web application hosted on a standard LAMP/LEMP server or cloud infrastructure. It provides four distinct portals:</p>
       <ul class="styled">
         <li><strong>Public Portal:</strong> Browse businesses, read reviews, view complaint outcomes.</li>
         <li><strong>User Portal:</strong> Register, verify identity (KYC), write reviews, file &amp; track complaints.</li>
         <li><strong>Business Owner Portal:</strong> Claim &amp; manage business listings, respond to reviews and complaints, subscribe to plans.</li>
         <li><strong>Admin Panel:</strong> Full platform governance — manage businesses, users, reviews, complaints, subscriptions, payments, blog, ads, and system settings.</li>
       </ul>
-      <p>
-        AI-powered features (AI Review Writer, AI Reviewer) are available as optional addons. The platform 
-        supports multiple payment gateways, multi-language, RTL, KYC verification, two-factor authentication,
-        social login (Google, Facebook, Microsoft, VKontakte), and a comprehensive subscription/plan system.
-      </p>
 
       <h3 id="s2-existing">2.3 Existing System / Work Environment</h3>
-      <p>
-        Businesses in the SOSANA ecosystem relied on fragmented, non-integrated approaches:
-      </p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Existing Approach</th><th>Limitations</th></tr></thead>
@@ -606,42 +543,15 @@
 
       <h3 id="s2-problem">2.4 Problem Statements</h3>
       <div class="card-grid">
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P1 — Fake Reviews</h4>
-          <p>Existing platforms are flooded with unverified, bot-generated, or purchased reviews distorting business trust scores.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P2 — No Complaint Workflow</h4>
-          <p>There is no standardised process for users to formally file, track, and resolve complaints against businesses.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P3 — Lack of Identity Verification</h4>
-          <p>Anonymous reviews and complaints cannot be trusted — there is no way to verify the reviewer's identity or stake.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P4 — No Crypto-Scam Categories</h4>
-          <p>Traditional review platforms have no specialised categories for rug pulls, exit scams, liquidity lock issues, or fake team socials.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P5 — Business Unresponsiveness</h4>
-          <p>Businesses rarely respond to consumer feedback. There is no mechanism to enforce response deadlines.</p>
-        </div>
-        <div class="card red">
-          <div class="card-icon">❌</div>
-          <h4>P6 — Fragmented Admin Control</h4>
-          <p>No centralised panel to moderate reviews, escalate complaints, manage subscriptions, and audit activity.</p>
-        </div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P1 — Fake Reviews</h4><p>Existing platforms are flooded with unverified, bot-generated, or purchased reviews distorting business trust scores.</p></div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P2 — No Complaint Workflow</h4><p>There is no standardised process for users to formally file, track, and resolve complaints against businesses.</p></div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P3 — Lack of Identity Verification</h4><p>Anonymous reviews and complaints cannot be trusted — there is no way to verify the reviewer's identity or stake.</p></div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P4 — No Crypto-Scam Categories</h4><p>Traditional review platforms have no specialised categories for rug pulls, exit scams, liquidity lock issues, or fake team socials.</p></div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P5 — Business Unresponsiveness</h4><p>Businesses rarely respond to consumer feedback. There is no mechanism to enforce response deadlines.</p></div>
+        <div class="card red"><div class="card-icon">❌</div><h4>P6 — Fragmented Admin Control</h4><p>No centralised panel to moderate reviews, escalate complaints, manage subscriptions, and audit activity.</p></div>
       </div>
 
       <h3 id="s2-need">2.5 Need for New System</h3>
-      <p>
-        A purpose-built platform is needed that combines:
-      </p>
       <ul class="styled">
         <li>On-chain KYC &amp; token-holding eligibility checks (via SOSANA dApp API)</li>
         <li>Structured, multi-status complaint lifecycle management</li>
@@ -655,46 +565,14 @@
 
       <h3 id="s2-proposed">2.6 Proposed System &amp; Features</h3>
       <div class="card-grid">
-        <div class="card accent">
-          <div class="card-icon">⭐</div>
-          <h4>Review System</h4>
-          <p>Star-rated reviews with attachments, AI writing assistant, spam detection, pending/published workflow, and business replies.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">📋</div>
-          <h4>Complaint Management</h4>
-          <p>8-status lifecycle (Filed → Resolved/Rejected/Withdrawn/Cleared/Under Review/Flagged/No Response) with response deadlines.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🏢</div>
-          <h4>Business Directory</h4>
-          <p>3-tier category taxonomy, SEO slugs, gallery, FAQs, contact form, embedded widget, KYC badge &amp; verification.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🔐</div>
-          <h4>Identity &amp; KYC</h4>
-          <p>Email verification, 2FA, social login, SOSANA on-chain KYC check, document upload KYC for businesses.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">💳</div>
-          <h4>Subscription Plans</h4>
-          <p>Tiered plans for business owners: Stripe, PayPal, Razorpay, Mollie, CoinGate, Xendit, and 10+ more.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🤖</div>
-          <h4>AI Addons</h4>
-          <p>AI Review Writer (helps users craft reviews) and AI Reviewer (auto-analyses business content) as optional addons.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">📊</div>
-          <h4>Admin Dashboard</h4>
-          <p>Full CRUD on all entities, audit logs, KYC approvals, advertisement management, newsletter, and system health.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🌍</div>
-          <h4>Multilingual &amp; SEO</h4>
-          <p>Dynamic language system with RTL support, auto-generated sitemaps, breadcrumbs, and schema.org markup.</p>
-        </div>
+        <div class="card accent"><div class="card-icon">⭐</div><h4>Review System</h4><p>Star-rated reviews with attachments, AI writing assistant, spam detection, pending/published workflow, and business replies.</p></div>
+        <div class="card accent"><div class="card-icon">📋</div><h4>Complaint Management</h4><p>8-status lifecycle (Filed → Resolved/Rejected/Withdrawn/Cleared/Under Review/Flagged/No Response) with response deadlines.</p></div>
+        <div class="card accent"><div class="card-icon">🏢</div><h4>Business Directory</h4><p>3-tier category taxonomy, SEO slugs, gallery, FAQs, contact form, embedded widget, KYC badge &amp; verification.</p></div>
+        <div class="card accent"><div class="card-icon">🔐</div><h4>Identity &amp; KYC</h4><p>Email verification, 2FA, social login, SOSANA on-chain KYC check, document upload KYC for businesses.</p></div>
+        <div class="card accent"><div class="card-icon">💳</div><h4>Subscription Plans</h4><p>Tiered plans for business owners: Stripe, PayPal, Razorpay, Mollie, CoinGate, Xendit, and 10+ more.</p></div>
+        <div class="card accent"><div class="card-icon">🤖</div><h4>AI Addons</h4><p>AI Review Writer (helps users craft reviews) and AI Reviewer (auto-analyses business content) as optional addons.</p></div>
+        <div class="card accent"><div class="card-icon">📊</div><h4>Admin Dashboard</h4><p>Full CRUD on all entities, audit logs, KYC approvals, advertisement management, newsletter, and system health.</p></div>
+        <div class="card accent"><div class="card-icon">🌍</div><h4>Multilingual &amp; SEO</h4><p>Dynamic language system with RTL support, auto-generated sitemaps, breadcrumbs, and schema.org markup.</p></div>
       </div>
 
       <h3 id="s2-scope">2.7 Scope &amp; Outcomes</h3>
@@ -788,28 +666,30 @@
       <h3 id="s2-pert">2.9 Project Plan (PERT Chart)</h3>
       <p>The following PERT-style timeline illustrates the major project phases and their estimated durations.</p>
       <div class="diagram-box">
-        <table style="font-size:13.5px">
-          <thead>
-            <tr>
-              <th>Task ID</th><th>Activity</th><th>Predecessor</th>
-              <th>Optimistic (weeks)</th><th>Most Likely (weeks)</th><th>Pessimistic (weeks)</th><th>Expected</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>T1</td><td>Requirements Gathering &amp; Analysis</td><td>—</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
-            <tr><td>T2</td><td>System Architecture &amp; DB Design</td><td>T1</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
-            <tr><td>T3</td><td>User Auth, KYC &amp; Admin Panel</td><td>T2</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
-            <tr><td>T4</td><td>Business Directory &amp; Categories</td><td>T2</td><td>2</td><td>3</td><td>4</td><td><strong>3.0</strong></td></tr>
-            <tr><td>T5</td><td>Review &amp; Rating Module</td><td>T3, T4</td><td>2</td><td>3</td><td>4</td><td><strong>3.0</strong></td></tr>
-            <tr><td>T6</td><td>Complaint Management System</td><td>T5</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
-            <tr><td>T7</td><td>Subscription &amp; Payment Integration</td><td>T3</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
-            <tr><td>T8</td><td>SOSANA dApp API Integration</td><td>T6</td><td>1</td><td>2</td><td>4</td><td><strong>2.2</strong></td></tr>
-            <tr><td>T9</td><td>AI Addons &amp; Spam Detection</td><td>T5</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
-            <tr><td>T10</td><td>Blog, Pages &amp; SEO Module</td><td>T4</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
-            <tr><td>T11</td><td>Testing &amp; QA</td><td>T6, T7, T8, T9, T10</td><td>1</td><td>2</td><td>4</td><td><strong>2.2</strong></td></tr>
-            <tr><td>T12</td><td>Deployment &amp; Go-Live</td><td>T11</td><td>1</td><td>1</td><td>2</td><td><strong>1.2</strong></td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table style="font-size:13.5px">
+            <thead>
+              <tr>
+                <th>Task ID</th><th>Activity</th><th>Predecessor</th>
+                <th>Optimistic</th><th>Most Likely</th><th>Pessimistic</th><th>Expected</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>T1</td><td>Requirements Gathering &amp; Analysis</td><td>—</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
+              <tr><td>T2</td><td>System Architecture &amp; DB Design</td><td>T1</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
+              <tr><td>T3</td><td>User Auth, KYC &amp; Admin Panel</td><td>T2</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
+              <tr><td>T4</td><td>Business Directory &amp; Categories</td><td>T2</td><td>2</td><td>3</td><td>4</td><td><strong>3.0</strong></td></tr>
+              <tr><td>T5</td><td>Review &amp; Rating Module</td><td>T3, T4</td><td>2</td><td>3</td><td>4</td><td><strong>3.0</strong></td></tr>
+              <tr><td>T6</td><td>Complaint Management System</td><td>T5</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
+              <tr><td>T7</td><td>Subscription &amp; Payment Integration</td><td>T3</td><td>2</td><td>3</td><td>5</td><td><strong>3.2</strong></td></tr>
+              <tr><td>T8</td><td>SOSANA dApp API Integration</td><td>T6</td><td>1</td><td>2</td><td>4</td><td><strong>2.2</strong></td></tr>
+              <tr><td>T9</td><td>AI Addons &amp; Spam Detection</td><td>T5</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
+              <tr><td>T10</td><td>Blog, Pages &amp; SEO Module</td><td>T4</td><td>1</td><td>2</td><td>3</td><td><strong>2.0</strong></td></tr>
+              <tr><td>T11</td><td>Testing &amp; QA</td><td>T6,T7,T8,T9,T10</td><td>1</td><td>2</td><td>4</td><td><strong>2.2</strong></td></tr>
+              <tr><td>T12</td><td>Deployment &amp; Go-Live</td><td>T11</td><td>1</td><td>1</td><td>2</td><td><strong>1.2</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
         <div class="diagram-label">Table 2.1 — PERT Activity Table | Critical Path: T1→T2→T3→T6→T8→T11→T12 (≈ 16.0 weeks)</div>
         <br>
         <div class="mermaid">
@@ -838,70 +718,31 @@ gantt
       </div>
     </div>
 
-    <!-- ══════════════════════════════════
+    <!-- ═══════════════════════════
          SECTION 3 — REQUIREMENT ANALYSIS
-    ══════════════════════════════════ -->
+    ═══════════════════════════ -->
     <div class="section" id="s3">
       <div class="section-number">Section 03</div>
       <h2 class="section-title">Requirement Analysis</h2>
 
       <h3 id="s3-feasibility">3.1 Feasibility Study</h3>
       <h4>Technical Feasibility</h4>
-      <p>
-        The platform is built on Laravel 11 with PHP 8.2 — a mature, well-documented, and widely-supported
-        technology stack. Standard LAMP/LEMP hosting is sufficient. All third-party integrations (SOSANA API,
-        payment gateways, AI APIs) provide well-documented REST APIs. The technical feasibility is
-        <span class="tag green">HIGH</span>.
-      </p>
+      <p>The platform is built on Laravel 11 with PHP 8.2 — a mature, well-documented, and widely-supported technology stack. All third-party integrations provide well-documented REST APIs. Technical feasibility is <span class="tag green">HIGH</span>.</p>
       <h4>Operational Feasibility</h4>
-      <p>
-        The system is designed with intuitive role-based dashboards. Business owners and users require
-        minimal training. Admin operations are self-explanatory. The platform includes built-in help
-        documentation and email notifications for all lifecycle events. Operational feasibility is
-        <span class="tag green">HIGH</span>.
-      </p>
+      <p>Designed with intuitive role-based dashboards. Business owners and users require minimal training. Operational feasibility is <span class="tag green">HIGH</span>.</p>
       <h4>Economic Feasibility</h4>
-      <p>
-        Revenue is generated through tiered business subscription plans. Hosting costs are minimal
-        (shared/VPS cloud). The base platform is a licensed SaaS product (one-time cost) with low
-        ongoing maintenance. Economic feasibility is <span class="tag green">HIGH</span>.
-      </p>
+      <p>Revenue is generated through tiered business subscription plans. Hosting costs are minimal. Economic feasibility is <span class="tag green">HIGH</span>.</p>
       <h4>Schedule Feasibility</h4>
-      <p>
-        With the core platform already built on a licensed base, customisation and integration tasks
-        are well-scoped. A 16-week delivery timeline is realistic with a 2-3 developer team.
-        Schedule feasibility is <span class="tag blue">MEDIUM–HIGH</span>.
-      </p>
+      <p>A 16-week delivery timeline is realistic with a 2-3 developer team. Schedule feasibility is <span class="tag blue">MEDIUM–HIGH</span>.</p>
       <h4>Legal Feasibility</h4>
-      <p>
-        The platform collects personal data and processes payments. GDPR compliance, privacy policy,
-        terms of service, and a data processing agreement are required. The SOSANA KYC integration
-        uses on-chain data, reducing PII storage on the platform. Legal feasibility is
-        <span class="tag orange">MEDIUM</span> (pending DPA completion).
-      </p>
+      <p>GDPR compliance, privacy policy, terms of service, and a data processing agreement are required. Legal feasibility is <span class="tag orange">MEDIUM</span> (pending DPA completion).</p>
 
       <h3 id="s3-users">3.2 Users of the System</h3>
       <div class="card-grid">
-        <div class="card accent">
-          <div class="card-icon">👤</div>
-          <h4>Guest (Unauthenticated)</h4>
-          <p>Browse business directory, read reviews and complaints, view ratings, search by category/location.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🙋</div>
-          <h4>Registered User</h4>
-          <p>All guest access + write reviews, file complaints (with SOSANA KYC), manage profile, 2FA, KYC upload.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🏢</div>
-          <h4>Business Owner</h4>
-          <p>Claim/manage business listing, respond to reviews &amp; complaints, manage subscription plan, view analytics.</p>
-        </div>
-        <div class="card accent">
-          <div class="card-icon">🔧</div>
-          <h4>Administrator</h4>
-          <p>Full platform governance: manage all entities, approve KYC, moderate content, configure system settings.</p>
-        </div>
+        <div class="card accent"><div class="card-icon">👤</div><h4>Guest (Unauthenticated)</h4><p>Browse business directory, read reviews and complaints, view ratings, search by category/location.</p></div>
+        <div class="card accent"><div class="card-icon">🙋</div><h4>Registered User</h4><p>All guest access + write reviews, file complaints (with SOSANA KYC), manage profile, 2FA, KYC upload.</p></div>
+        <div class="card accent"><div class="card-icon">🏢</div><h4>Business Owner</h4><p>Claim/manage business listing, respond to reviews &amp; complaints, manage subscription plan, view analytics.</p></div>
+        <div class="card accent"><div class="card-icon">🔧</div><h4>Administrator</h4><p>Full platform governance: manage all entities, approve KYC, moderate content, configure system settings.</p></div>
       </div>
 
       <h3 id="s3-modules">3.3 System Modules</h3>
@@ -926,14 +767,9 @@ gantt
       </div>
 
       <h3 id="s3-process">3.4 Process Model</h3>
-      <p>
-        TrustBOB was developed using an <strong>Agile (Scrum-inspired) incremental development model</strong>.
-        SOSANA-specific customisations applied as feature branches.
-      </p>
+      <p>TrustBOB was developed using an <strong>Agile (Scrum-inspired) incremental development model</strong>. SOSANA-specific customisations applied as feature branches.</p>
       <div class="callout">
-        <strong>Why Agile?</strong> Requirements evolved alongside SOSANA's blockchain ecosystem. The complaint
-        module (with on-chain eligibility checks) was added in a later iteration, making Agile's iterative
-        approach ideal for accommodating changing business requirements without disrupting the stable core.
+        <strong>Why Agile?</strong> Requirements evolved alongside SOSANA's blockchain ecosystem. The complaint module (with on-chain eligibility checks) was added in a later iteration, making Agile's iterative approach ideal.
       </div>
       <div class="diagram-box">
         <div class="mermaid">
@@ -992,7 +828,7 @@ flowchart LR
       <h3 id="s3-usecase">3.6 Use Cases</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Use Case ID</th><th>Use Case Name</th><th>Actor(s)</th><th>Description</th></tr></thead>
+          <thead><tr><th>ID</th><th>Use Case Name</th><th>Actor(s)</th><th>Description</th></tr></thead>
           <tbody>
             <tr><td>UC-01</td><td>Register Account</td><td>User</td><td>New user registers with email, verifies email address.</td></tr>
             <tr><td>UC-02</td><td>Login (Standard / Social / 2FA)</td><td>User, Business Owner, Admin</td><td>Authenticate using credentials, OAuth, or 2FA token.</td></tr>
@@ -1039,7 +875,6 @@ graph TD
     Guest --> UC3
     Guest --> UC2
     Guest --> UC1
-
     User --> UC3
     User --> UC4
     User --> UC5
@@ -1047,17 +882,14 @@ graph TD
     User --> UC12
     User --> UC13
     User --> UC14
-
     BO --> UC6
     BO --> UC7
     BO --> UC9
     BO --> UC14
-
     Admin --> UC10
     Admin --> UC11
     Admin --> UC8
     Admin --> UC14
-
     UC5 -.->|«include»| UC8
     UC13 -.->|«extend»| UC4
         </div>
@@ -1065,21 +897,19 @@ graph TD
       </div>
     </div>
 
-    <!-- ══════════════════════════════════
+    <!-- ═══════════════════════════
          SECTION 4 — DESIGN
-    ══════════════════════════════════ -->
+    ═══════════════════════════ -->
     <div class="section" id="s4">
       <div class="section-number">Section 04</div>
       <h2 class="section-title">Design</h2>
 
-      <!-- 4.1 Use Case Scenarios -->
       <h3 id="s4-scenarios">4.1 Use Case Scenarios</h3>
-
       <h4>Scenario UC-05: File a Complaint</h4>
       <div class="table-wrap">
         <table>
           <tbody>
-            <tr><td><strong>Use Case ID</strong></td><td>UC-05</td></tr>
+            <tr><td style="min-width:160px"><strong>Use Case ID</strong></td><td>UC-05</td></tr>
             <tr><td><strong>Use Case Name</strong></td><td>File a Complaint Against a Business</td></tr>
             <tr><td><strong>Actor</strong></td><td>Registered User (SOSANA KYC Verified)</td></tr>
             <tr><td><strong>Preconditions</strong></td><td>User is logged in, email verified, SOSANA KYC passed, token holding requirement met.</td></tr>
@@ -1104,7 +934,7 @@ graph TD
       <div class="table-wrap">
         <table>
           <tbody>
-            <tr><td><strong>Use Case ID</strong></td><td>UC-04</td></tr>
+            <tr><td style="min-width:160px"><strong>Use Case ID</strong></td><td>UC-04</td></tr>
             <tr><td><strong>Use Case Name</strong></td><td>Write a Review for a Business</td></tr>
             <tr><td><strong>Actor</strong></td><td>Registered User (optional: AI Addon enabled)</td></tr>
             <tr><td><strong>Preconditions</strong></td><td>User is logged in and on the business profile page.</td></tr>
@@ -1122,13 +952,11 @@ graph TD
         </table>
       </div>
 
-      <!-- 4.2 Class Diagram -->
       <h3 id="s4-class">4.2 Class Diagram</h3>
       <div class="diagram-box">
         <div class="mermaid">
 classDiagram
     direction TB
-
     class User {
         +int id
         +string firstname
@@ -1144,7 +972,6 @@ classDiagram
         +fileComplaint()
         +updateProfile()
     }
-
     class BusinessOwner {
         +int id
         +string firstname
@@ -1157,7 +984,6 @@ classDiagram
         +respondToComplaint()
         +subscribe()
     }
-
     class Admin {
         +int id
         +string name
@@ -1166,7 +992,6 @@ classDiagram
         +manageSettings()
         +approveKYC()
     }
-
     class Business {
         +int id
         +string name
@@ -1183,7 +1008,6 @@ classDiagram
         +int total_reviews
         +updateReviewStats()
     }
-
     class BusinessReview {
         +int id
         +int business_id
@@ -1195,7 +1019,6 @@ classDiagram
         +isPending()
         +isPublished()
     }
-
     class BusinessComplaint {
         +int id
         +int business_id
@@ -1209,7 +1032,6 @@ classDiagram
         +isResolved()
         +isFlagged()
     }
-
     class KycVerification {
         +int id
         +int user_id
@@ -1218,7 +1040,6 @@ classDiagram
         +string document_back
         +int status
     }
-
     class Subscription {
         +int id
         +int business_owner_id
@@ -1227,7 +1048,6 @@ classDiagram
         +timestamp ends_at
         +string status
     }
-
     class Plan {
         +int id
         +string name
@@ -1235,7 +1055,6 @@ classDiagram
         +int duration_days
         +json features
     }
-
     class Transaction {
         +int id
         +int business_owner_id
@@ -1243,7 +1062,6 @@ classDiagram
         +float amount
         +string status
     }
-
     User "1" --> "0..*" BusinessReview : writes
     User "1" --> "0..*" BusinessComplaint : files
     User "1" --> "0..*" KycVerification : submits
@@ -1257,7 +1075,6 @@ classDiagram
         <div class="diagram-label">Figure 4.1 — TrustBOB Class Diagram (Core Entities)</div>
       </div>
 
-      <!-- 4.3 Sequence Diagram -->
       <h3 id="s4-seq">4.3 Sequence Diagram</h3>
       <p><strong>Scenario: User files a complaint (with SOSANA KYC check)</strong></p>
       <div class="diagram-box">
@@ -1277,7 +1094,7 @@ sequenceDiagram
     ComplaintController-->>Browser: Render complaint form
 
     U->>Browser: Fill form & submit
-    Browser->>ComplaintController: POST /{slug}/complaint (title, body, category)
+    Browser->>ComplaintController: POST /{slug}/complaint
     ComplaintController->>DB: Get authenticated user
     DB-->>ComplaintController: User record
 
@@ -1287,7 +1104,6 @@ sequenceDiagram
     alt Not eligible
         ComplaintController-->>Browser: toastr error (KYC / token message)
     else Eligible
-        ComplaintController->>DB: Validate form inputs
         ComplaintController->>DB: Save BusinessComplaint (status=FILED)
         DB-->>ComplaintController: Complaint saved
         ComplaintController->>Mail: Send notification to User & Business Owner
@@ -1326,7 +1142,6 @@ sequenceDiagram
         <div class="diagram-label">Figure 4.3 — Sequence Diagram: Business Owner Responds to Complaint</div>
       </div>
 
-      <!-- 4.4 Activity Diagram -->
       <h3 id="s4-activity">4.4 Activity Diagram</h3>
       <p><strong>Complaint Lifecycle Activity Flow</strong></p>
       <div class="diagram-box">
@@ -1366,12 +1181,7 @@ flowchart TD
         <div class="diagram-label">Figure 4.4 — Activity Diagram: Complaint Lifecycle</div>
       </div>
 
-      <!-- 4.5 Collaboration Diagram -->
       <h3 id="s4-collab">4.5 Collaboration Diagram</h3>
-      <p>
-        The collaboration diagram below shows the object interactions during the <strong>Review Submission</strong> process,
-        illustrating the message flow between objects.
-      </p>
       <div class="diagram-box">
         <div class="mermaid">
 graph LR
@@ -1397,7 +1207,6 @@ graph LR
         <div class="diagram-label">Figure 4.5 — Collaboration Diagram: Review Submission Process</div>
       </div>
 
-      <!-- 4.6 Package Diagram -->
       <h3 id="s4-package">4.6 Package Diagram</h3>
       <div class="diagram-box">
         <div class="mermaid">
@@ -1421,19 +1230,16 @@ graph TD
             Jobs["Jobs: DispatchCrmTicket"]
         end
     end
-
     subgraph Frontend["🖥️ Frontend Package"]
         Blade["Blade Views\n(public, business, admin)"]
         Assets["Assets (CSS/JS via Vite)"]
         Livewire["Livewire Components"]
     end
-
     subgraph Database["🗄️ Database Package"]
         Migrations["Migrations"]
         Seeders["Seeders"]
         Factories["Factories"]
     end
-
     subgraph External["🌐 External Package"]
         SOSANA["SOSANA dApp API"]
         PayGW["Payment Gateways\n(Stripe, PayPal, 9+ others)"]
@@ -1441,7 +1247,6 @@ graph TD
         OAuth["OAuth Providers"]
         SMTP["Mail / SMTP"]
     end
-
     HTTP --> Models
     HTTP --> Services
     Models --> Database
@@ -1452,7 +1257,6 @@ graph TD
         <div class="diagram-label">Figure 4.6 — Package Diagram: TrustBOB System Architecture</div>
       </div>
 
-      <!-- 4.7 Deployment Diagram -->
       <h3 id="s4-deploy">4.7 Deployment Diagram</h3>
       <div class="diagram-box">
         <div class="mermaid">
@@ -1460,33 +1264,27 @@ graph TB
     subgraph Client["🖥️ Client Layer"]
         Browser["Web Browser\n(Chrome, Firefox, Edge, Safari)"]
     end
-
     subgraph CDN["🌐 CDN / Load Balancer"]
         CF["Cloudflare / SSL Termination"]
     end
-
     subgraph WebServer["🖧 Web Server Node"]
         Nginx["Nginx / Apache\n(PHP-FPM 8.2)"]
         Laravel["Laravel 11 Application\n(Artisan, Queue Workers, Scheduler)"]
         Vite["Compiled Frontend Assets\n(CSS, JS, Images)"]
     end
-
     subgraph DB["🗄️ Database Server"]
         MySQL["MySQL 8.0\n(Primary Database)"]
     end
-
     subgraph Storage["📁 Storage"]
         LocalFS["Local File System\n(uploads, avatars, attachments)"]
         S3["AWS S3 (Optional)\n(Cloud Media Storage)"]
     end
-
     subgraph External["🔗 External Services"]
         SMTP["SMTP Mail Server\n(SendGrid / Resend)"]
         SOSANA["SOSANA dApp API\n(KYC + Token Eligibility)"]
         PayGW["Payment Gateways\n(Stripe, PayPal, etc.)"]
         AI["OpenAI API\n(AI Review Addons)"]
     end
-
     Browser --> CF
     CF --> Nginx
     Nginx --> Laravel
@@ -1502,9 +1300,7 @@ graph TB
         <div class="diagram-label">Figure 4.7 — Deployment Diagram: TrustBOB Production Infrastructure</div>
       </div>
 
-      <!-- 4.8 DFD -->
       <h3 id="s4-dfd">4.8 Data Flow Diagrams (DFD)</h3>
-
       <h4>DFD Level 0 — Context Diagram</h4>
       <div class="diagram-box">
         <div class="mermaid">
@@ -1515,24 +1311,17 @@ graph LR
     SOSANA(["🔗 SOSANA dApp"])
     Payment(["💳 Payment Gateway"])
     Mail(["📧 Mail Server"])
-
     System["TrustBOB\nSystem"]
-
     User -- "Reviews, Complaints, KYC Docs" --> System
     System -- "Review Status, Complaint Status, Notifications" --> User
-
     BusinessOwner -- "Business Data, Responses, Subscription Payment" --> System
     System -- "Business Dashboard, Analytics, Notifications" --> BusinessOwner
-
     Admin -- "Moderation Decisions, Settings, Approvals" --> System
     System -- "Reports, Audit Logs, Dashboards" --> Admin
-
     System -- "KYC Verification Request" --> SOSANA
     SOSANA -- "Eligibility Response" --> System
-
     System -- "Payment Requests" --> Payment
     Payment -- "Payment Confirmation" --> System
-
     System -- "Email Notifications" --> Mail
         </div>
         <div class="diagram-label">Figure 4.8a — DFD Level 0: Context Diagram</div>
@@ -1547,39 +1336,31 @@ graph TD
         BO(["Business Owner"])
         A(["Admin"])
     end
-
     P1["1.0\nUser Management\n& Authentication"]
     P2["2.0\nBusiness Directory\nManagement"]
     P3["3.0\nReview Processing"]
     P4["4.0\nComplaint Management"]
     P5["5.0\nSubscription &\nPayment Processing"]
     P6["6.0\nContent &\nNotification Management"]
-
     DS1[("DS1: Users")]
     DS2[("DS2: Businesses")]
     DS3[("DS3: Reviews")]
     DS4[("DS4: Complaints")]
     DS5[("DS5: Subscriptions\n& Transactions")]
     DS6[("DS6: Content\n& Settings")]
-
     U --> P1 --> DS1
     BO --> P1
     A --> P1
-
     BO --> P2 --> DS2
     A --> P2
-
     U --> P3 --> DS3
     DS2 --> P3
     DS1 --> P3
-
     U --> P4 --> DS4
     DS2 --> P4
     DS1 --> P4
-
     BO --> P5 --> DS5
     DS1 --> P5
-
     A --> P6 --> DS6
     DS1 --> P6
     DS3 --> P6
@@ -1596,20 +1377,17 @@ graph TD
     BO(["Business Owner"])
     A(["Admin"])
     SAPI(["SOSANA API"])
-
     P41["4.1\nValidate Eligibility\n(KYC + Token)"]
     P42["4.2\nRecord Complaint"]
     P43["4.3\nNotify Stakeholders"]
     P44["4.4\nProcess Business Response"]
     P45["4.5\nAdmin Review & Decision"]
     P46["4.6\nUpdate Complaint Status"]
-
     DS4[("DS4:\nBusinessComplaints")]
     DS4A[("DS4a:\nComplaint\nAttachments")]
     DS4R[("DS4b:\nComplaint\nReplies")]
     DS1[("DS1:\nUsers")]
     DS2[("DS2:\nBusinesses")]
-
     U -- "Complaint Data" --> P41
     P41 -- "Eligibility Check" --> SAPI
     SAPI -- "KYC Result" --> P41
@@ -1629,7 +1407,6 @@ graph TD
         <div class="diagram-label">Figure 4.8c — DFD Level 2: Complaint Management Sub-Process</div>
       </div>
 
-      <!-- 4.9 Data Dictionary -->
       <h3 id="s4-dd">4.9 Data Dictionary</h3>
 
       <h4>Table: users</h4>
@@ -1684,8 +1461,6 @@ graph TD
             <tr><td>id</td><td>BIGINT (PK)</td><td>No</td><td>Unique complaint identifier</td></tr>
             <tr><td>business_id</td><td>BIGINT (FK)</td><td>No</td><td>References businesses.id</td></tr>
             <tr><td>user_id</td><td>BIGINT (FK)</td><td>Yes</td><td>References users.id (null=anonymous)</td></tr>
-            <tr><td>name</td><td>VARCHAR(255)</td><td>Yes</td><td>Complainant name (guest mode)</td></tr>
-            <tr><td>email</td><td>VARCHAR(255)</td><td>Yes</td><td>Complainant email (guest mode)</td></tr>
             <tr><td>title</td><td>VARCHAR(255)</td><td>No</td><td>Short complaint title</td></tr>
             <tr><td>body</td><td>TEXT</td><td>No</td><td>Full complaint description</td></tr>
             <tr><td>category</td><td>ENUM</td><td>No</td><td>rug_pull | exit_scam | locked_liquidity | misleading_marketing | ghosted_abandonment | fake_team_socials | referral_scam | other</td></tr>
@@ -1732,7 +1507,6 @@ graph TD
         </table>
       </div>
 
-      <!-- 4.10 ER Diagram -->
       <h3 id="s4-er">4.10 ER Diagram</h3>
       <div class="diagram-box">
         <div class="mermaid">
@@ -1748,7 +1522,6 @@ erDiagram
         tinyint two_factor
         timestamp email_verified_at
     }
-
     BUSINESS_OWNERS {
         bigint id PK
         string firstname
@@ -1757,7 +1530,6 @@ erDiagram
         tinyint status
         tinyint kyc_status
     }
-
     BUSINESSES {
         bigint id PK
         bigint category_id FK
@@ -1773,14 +1545,12 @@ erDiagram
         int total_reviews
         string trust_status
     }
-
     BUSINESS_OWNER_PIVOT {
         bigint id PK
         bigint business_id FK
         bigint business_owner_id FK
         string role
     }
-
     CATEGORIES {
         bigint id PK
         bigint parent_id FK
@@ -1788,7 +1558,6 @@ erDiagram
         string slug
         int type
     }
-
     BUSINESS_REVIEWS {
         bigint id PK
         bigint business_id FK
@@ -1798,14 +1567,12 @@ erDiagram
         tinyint rating
         tinyint status
     }
-
     BUSINESS_REVIEW_REPLIES {
         bigint id PK
         bigint business_review_id FK
         bigint business_owner_id FK
         text body
     }
-
     BUSINESS_COMPLAINTS {
         bigint id PK
         bigint business_id FK
@@ -1816,27 +1583,23 @@ erDiagram
         tinyint status
         timestamp response_deadline_at
     }
-
     BUSINESS_COMPLAINT_REPLIES {
         bigint id PK
         bigint business_complaint_id FK
         text body
     }
-
     BUSINESS_COMPLAINT_ATTACHMENTS {
         bigint id PK
         bigint business_complaint_id FK
         bigint message_id FK
         string file_path
     }
-
     KYC_VERIFICATIONS {
         bigint id PK
         bigint user_id FK
         string document_type
         tinyint status
     }
-
     PLANS {
         bigint id PK
         string name
@@ -1844,7 +1607,6 @@ erDiagram
         int duration_days
         json features
     }
-
     SUBSCRIPTIONS {
         bigint id PK
         bigint business_owner_id FK
@@ -1855,7 +1617,6 @@ erDiagram
         timestamp ends_at
         string status
     }
-
     TRANSACTIONS {
         bigint id PK
         bigint business_owner_id FK
@@ -1863,7 +1624,6 @@ erDiagram
         decimal amount
         string status
     }
-
     ADMIN_AUDIT_LOGS {
         bigint id PK
         bigint admin_id FK
@@ -1874,7 +1634,6 @@ erDiagram
         json new_values
         timestamp created_at
     }
-
     USERS ||--o{ BUSINESS_REVIEWS : "writes"
     USERS ||--o{ BUSINESS_COMPLAINTS : "files"
     USERS ||--o{ KYC_VERIFICATIONS : "submits"
@@ -1922,20 +1681,40 @@ erDiagram
     gantt: { titleTopMargin: 25, barHeight: 20, barGap: 4, topPadding: 50, leftPadding: 175 }
   });
 
-  // Smooth scroll + active link highlight
+  function toggleTOC() {
+    const toc = document.getElementById('toc');
+    const overlay = document.getElementById('toc-overlay');
+    const btn = document.getElementById('toc-toggle');
+    const isOpen = toc.classList.toggle('open');
+    overlay.classList.toggle('open', isOpen);
+    btn.textContent = isOpen ? '✕' : '☰';
+  }
+
+  function closeTOC() {
+    document.getElementById('toc').classList.remove('open');
+    document.getElementById('toc-overlay').classList.remove('open');
+    document.getElementById('toc-toggle').textContent = '☰';
+  }
+
+  // Smooth scroll + auto-close on mobile
   document.querySelectorAll('#toc a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Close TOC on mobile after click
+        if (window.innerWidth <= 768) closeTOC();
+      }
     });
   });
 
+  // Active link highlight on scroll
   const sections = document.querySelectorAll('[id]');
   const navLinks = document.querySelectorAll('#toc a');
   window.addEventListener('scroll', () => {
     let current = '';
-    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
     navLinks.forEach(l => {
       l.classList.remove('active');
       if (l.getAttribute('href') === '#' + current) l.classList.add('active');
@@ -1944,6 +1723,3 @@ erDiagram
 </script>
 </body>
 </html>
-
-
-
